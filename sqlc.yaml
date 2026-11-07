@@ -1,0 +1,23 @@
+version: "2"
+sql:
+  - name: ledger
+    engine: postgresql
+    schema: db/migrations/ledger
+    queries: db/queries/ledger
+    gen:
+      go:
+        package: sqlcgen
+        out: internal/ledger/adapter/postgres/sqlcgen
+        sql_package: pgx/v5
+        emit_empty_slices: true
+        overrides:
+          - db_type: uuid
+            go_type: string
+          - db_type: uuid
+            nullable: true
+            go_type: { type: string, pointer: true }
+          - db_type: timestamptz
+            go_type: time.Time
+          - db_type: timestamptz
+            nullable: true
+            go_type: { import: time, type: Time, pointer: true }

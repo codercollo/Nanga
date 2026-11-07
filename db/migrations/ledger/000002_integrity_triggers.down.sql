@@ -1,0 +1,13 @@
+DROP TRIGGER IF EXISTS holds_guard_update ON ledger.holds;
+DROP TRIGGER IF EXISTS accounts_guard_update ON ledger.accounts;
+DROP TRIGGER IF EXISTS entries_journal_balanced ON ledger.entries;
+DROP TRIGGER IF EXISTS holds_no_delete ON ledger.holds;
+DROP TRIGGER IF EXISTS accounts_no_delete ON ledger.accounts;
+DROP TRIGGER IF EXISTS entries_no_truncate ON ledger.entries;
+DROP TRIGGER IF EXISTS journals_no_truncate ON ledger.journals;
+DROP TRIGGER IF EXISTS entries_append_only ON ledger.entries;
+DROP TRIGGER IF EXISTS journals_append_only ON ledger.journals;
+DROP FUNCTION IF EXISTS ledger.guard_hold_update();
+DROP FUNCTION IF EXISTS ledger.guard_account_update();
+DROP FUNCTION IF EXISTS ledger.assert_journal_balanced();
+DROP FUNCTION IF EXISTS ledger.forbid_mutation();
