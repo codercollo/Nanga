@@ -1,0 +1,48 @@
+# Run from the repo root: docker compose -f deploy/docker-compose.yaml up
+name: nanga
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: nanga
+      POSTGRES_PASSWORD: nanga
+      POSTGRES_DB: nanga
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nanga -d nanga"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ["5672:5672", "15672:15672"]
+
+  migrate:
+    image: migrate/migrate:v4.17.1
+    depends_on:
+      postgres: { condition: service_healthy }
+    volumes: ["../db/migrations/ledger:/migrations:ro"]
+    command: ["-path=/migrations", "-database=postgres://nanga:nanga@postgres:5432/nanga?sslmode=disable&x-migrations-table=ledger_schema_migrations", "up"]
+
+  ledger:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      args: { SERVICE: ledger }
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    environment:
+      ENV: dev
+      LOG_FORMAT: text
+      HTTP_ADDR: ":8081"
+      PG_DSN: postgres://nanga:nanga@postgres:5432/nanga?sslmode=disable
+    ports: ["8081:8081"]
+
+volumes:
+  pgdata:
